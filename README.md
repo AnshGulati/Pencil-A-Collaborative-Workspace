@@ -1,0 +1,2 @@
+# Pencil A Collaborative Workspace
+ The Collaborative Whiteboard Application is a real-time, web-based platform that allows multiple users to draw, interact, and collaborate on a shared canvas. It features essential drawing tools, session management, and real-time updates, making it ideal for group brainstorming and creative collaboration. The application provides a seamless experience for users to work together, regardless of location.
