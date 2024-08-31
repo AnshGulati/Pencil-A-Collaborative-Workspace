@@ -1,0 +1,62 @@
+* {
+    box-sizing: border-box;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    /* Prevent scrollbars */
+}
+
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 60px;
+    /* Sidebar width */
+    height: 450px;
+    /* Full viewport height */
+    background-color: #ccc;
+    border: 1px solid #afafaf;
+    border-radius: 8px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 10px;
+    margin-top: 80px;
+    padding-top: 20px;
+    /* Space at the top for tools */
+
+    /* Add drop shadow */
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    cursor: default;
+}
+
+.tool-icon {
+    width: 40px;
+    /* Icon size */
+    height: 40px;
+    margin-top: 20px;
+    /* margin-bottom: 20px;  */
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.tool-icon:hover {
+    background-color: #ddd;
+}
+
+.tool-icon.active {
+    border-radius: 8px;
+    background-color: #007bff;
+    transform: scale(1.1);
+}

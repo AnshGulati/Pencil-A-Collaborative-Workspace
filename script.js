@@ -2,6 +2,7 @@
 const canvas = document.getElementById("webglCanvas");
 const gl = canvas.getContext("webgl");
 
+// Throw an error if WebGL is not supported in the browser. 
 if (!gl) {
   alert("Your browser does not support WebGL");
 }
@@ -24,6 +25,7 @@ const vertexShaderSource = `
     attribute vec4 a_position;
     void main() {
         gl_Position = a_position;
+        gl_PointSize = 2.0; // Set the size of the point
     }
 `;
 
@@ -36,7 +38,7 @@ const fragmentShaderSource = `
     }
 `;
 
-// Compiling shader
+// Compile shader
 function createShader(gl, type, source) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
@@ -66,6 +68,7 @@ function createProgram(gl, vertexShader, fragmentShader) {
   return program;
 }
 
+// Link Program
 const program = createProgram(gl, vertexShader, fragmentShader);
 gl.useProgram(program);
 
@@ -81,7 +84,7 @@ gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 gl.enableVertexAttribArray(positionLocation);
 gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-// Variables which store the state of Drawing
+// Variables to store the state of Drawing
 let isDrawing = false;
 let lastX = 0, lastY = 0;
 const strokes = [];
@@ -95,15 +98,17 @@ function getMousePosition(canvas, event) {
   return [x, y];
 }
 
-// Mouse event handlers
-canvas.addEventListener("mousedown", (e) => {
-  if (!isPencilActive) return; // Do nothing if pencil tool is not active
+// Handle mousedown event
+function handleMouseDown(e) {
+  if (!isPencilActive) return;
 
+  // Clear Canvas on pressing Right Click 
   if (e.button === 2) {
     clearCanvas();
     return;
   }
 
+  // Left Click to draw 
   isDrawing = true;
   const [x, y] = getMousePosition(canvas, e);
   lastX = x;
@@ -119,11 +124,15 @@ canvas.addEventListener("mousedown", (e) => {
     color: [r / 255, g / 255, b / 255, 1], // Convert to normalized color values
   });
 
+  // Draw immediately after the first point is placed
+  draw();
+
   // Set cursor to crosshair while drawing
   canvas.style.cursor = 'crosshair';
-});
+}
 
-canvas.addEventListener("mousemove", (e) => {
+// Handle mousemove event
+function handleMouseMove(e) {
   if (!isDrawing) return;
 
   const [x, y] = getMousePosition(canvas, e);
@@ -136,19 +145,19 @@ canvas.addEventListener("mousemove", (e) => {
   lastY = y;
 
   draw();
-});
+}
 
-canvas.addEventListener("mouseup", () => {
+// Handle mouseup event
+function handleMouseUp() {
   isDrawing = false;
   // Reset cursor to crosshair if pencil tool is active, otherwise default
   canvas.style.cursor = isPencilActive ? 'crosshair' : 'default';
-});
+}
 
-canvas.addEventListener("mouseout", () => {
-  isDrawing = false;
-  // Reset cursor to crosshair if pencil tool is active, otherwise default
-  canvas.style.cursor = isPencilActive ? 'crosshair' : 'default';
-});
+// Attach event listeners to the document
+document.addEventListener("mousedown", handleMouseDown);
+document.addEventListener("mousemove", handleMouseMove);
+document.addEventListener("mouseup", handleMouseUp);
 
 // Draw function
 function draw() {
@@ -160,7 +169,14 @@ function draw() {
 
     gl.uniform4f(colorLocation, ...color); // Set the color for the stroke
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
-    gl.drawArrays(gl.LINE_STRIP, 0, points.length / 2);
+
+    if (points.length === 2) {
+      // Draw a point if the stroke has only one point
+      gl.drawArrays(gl.POINTS, 0, 1);
+    } else {
+      // Draw a line strip if the stroke has multiple points
+      gl.drawArrays(gl.LINE_STRIP, 0, points.length / 2);
+    }
   });
 }
 
@@ -168,7 +184,7 @@ function draw() {
 function clearCanvas() {
   // Set the clear color to off-white
   gl.clearColor(245 / 255, 245 / 255, 245 / 255, 1); // Off-white background
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT); // Clear the Buffer
   strokes.length = 0; // Clear all stored strokes
 }
 
