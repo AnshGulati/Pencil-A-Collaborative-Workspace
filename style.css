@@ -1,62 +1,93 @@
-* {
-    box-sizing: border-box;
-}
 
 body,
 html {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    /* Prevent scrollbars */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrollbars */
+  
+}
+#Topbar {
+  position: fixed; 
+  top: 0;
+  left: 0;
+  width: 800px; /* Sidebar width */
+  height: 6vh; /* Full viewport height */
+  background-color: #ccc;
+  /* border: 1px solid #afafaf; */
+  border-radius: 8px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 33%;
+  margin-top: 10px;
+  /* padding-top: 20px;  */
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); 
+}
+.tool-icon-clear{
+  width: 40px; /* Icon size */
+  height: 40px;
+  padding: 2px;
+  margin-top: 8px;
+  margin-right: 725px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+.tool-icon-clear:hover {
+  background-color: #ddd;
 }
 
+.tool-icon-clear.active {
+  border-radius: 8px;
+  background-color: #3195ff;
+  transform: scale(1.1);
+}
 #sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 60px;
-    /* Sidebar width */
-    height: 450px;
-    /* Full viewport height */
-    background-color: #ccc;
-    border: 1px solid #afafaf;
-    border-radius: 8px;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-left: 10px;
-    margin-top: 80px;
-    padding-top: 20px;
-    /* Space at the top for tools */
-
-    /* Add drop shadow */
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 60px; /* Sidebar width */
+  height: 60vh; /* Full viewport height */
+  background-color: #ccc;
+  
+  border-radius: 8px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 10px;
+  margin-top: 80px;
+  padding-top: 20px; /* Space at the top for tools */
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Add drop shadow */
 }
-
 canvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-    cursor: default;
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  cursor: default;
+  display: block;
+}
+.tool-icon,
+.tool-icon-2 {
+  width: 40px; /* Icon size */
+  height: 40px;
+  margin-top: 25%;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+.tool-icon:hover,
+.tool-icon-2:hover {
+  background-color: #ddd;
+}
+.tool-icon.active,
+.tool-icon-2.active {
+  border-radius: 8px;
+  background-color: #3195ff;
+  transform: scale(1.1);
 }
 
-.tool-icon {
-    width: 40px;
-    /* Icon size */
-    height: 40px;
-    margin-top: 20px;
-    /* margin-bottom: 20px;  */
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.tool-icon:hover {
-    background-color: #ddd;
-}
-
-.tool-icon.active {
-    border-radius: 8px;
-    background-color: #007bff;
-    transform: scale(1.1);
+#eraserTool {
+  width: 30px;
+  height: 30px;
+  padding: 8%;
 }

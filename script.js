@@ -2,7 +2,6 @@
 const canvas = document.getElementById("webglCanvas");
 const gl = canvas.getContext("webgl");
 
-// Throw an error if WebGL is not supported in the browser. 
 if (!gl) {
   alert("Your browser does not support WebGL");
 }
@@ -25,7 +24,6 @@ const vertexShaderSource = `
     attribute vec4 a_position;
     void main() {
         gl_Position = a_position;
-        gl_PointSize = 2.0; // Set the size of the point
     }
 `;
 
@@ -38,7 +36,7 @@ const fragmentShaderSource = `
     }
 `;
 
-// Compile shader
+// Compiling shader
 function createShader(gl, type, source) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
@@ -68,7 +66,6 @@ function createProgram(gl, vertexShader, fragmentShader) {
   return program;
 }
 
-// Link Program
 const program = createProgram(gl, vertexShader, fragmentShader);
 gl.useProgram(program);
 
@@ -84,11 +81,13 @@ gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 gl.enableVertexAttribArray(positionLocation);
 gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-// Variables to store the state of Drawing
+// Variables which store the state of Drawing
 let isDrawing = false;
 let lastX = 0, lastY = 0;
 const strokes = [];
 let isPencilActive = false; // Flag to check if pencil tool is active
+let isEraserActive = false; // Flag to check if eraser tool is active
+const ERASER_RADIUS = 0.05; // Adjust the size of the eraser
 
 // Function to convert mouse coordinates to WebGL coordinates
 function getMousePosition(canvas, event) {
@@ -98,21 +97,26 @@ function getMousePosition(canvas, event) {
   return [x, y];
 }
 
-// Handle mousedown event
-function handleMouseDown(e) {
-  if (!isPencilActive) return;
+// Mouse event handlers
+canvas.addEventListener("mousedown", (e) => {
+  if (!isPencilActive && !isEraserActive) return; // Do nothing if no tool is active
 
-  // Clear Canvas on pressing Right Click 
+  const [x, y] = getMousePosition(canvas, e);
+  lastX = x;
+  lastY = y;
+
+  if (isEraserActive) {
+    eraseStroke(x, y);
+    draw();
+    return;
+  }
+
   if (e.button === 2) {
     clearCanvas();
     return;
   }
 
-  // Left Click to draw 
   isDrawing = true;
-  const [x, y] = getMousePosition(canvas, e);
-  lastX = x;
-  lastY = y;
 
   // Get the current brush color from the color picker
   const brushColor = document.getElementById("brushColor").value;
@@ -124,18 +128,21 @@ function handleMouseDown(e) {
     color: [r / 255, g / 255, b / 255, 1], // Convert to normalized color values
   });
 
-  // Draw immediately after the first point is placed
-  draw();
-
   // Set cursor to crosshair while drawing
   canvas.style.cursor = 'crosshair';
-}
+});
 
-// Handle mousemove event
-function handleMouseMove(e) {
+canvas.addEventListener("mousemove", (e) => {
   if (!isDrawing) return;
 
   const [x, y] = getMousePosition(canvas, e);
+
+  if (isEraserActive) {
+    eraseStroke(x, y);
+    draw();
+    return;
+  }
+
   const currentStroke = strokes[strokes.length - 1];
 
   // Add the current point to the stroke
@@ -145,19 +152,31 @@ function handleMouseMove(e) {
   lastY = y;
 
   draw();
-}
+});
 
-// Handle mouseup event
-function handleMouseUp() {
+canvas.addEventListener("mouseup", () => {
   isDrawing = false;
-  // Reset cursor to crosshair if pencil tool is active, otherwise default
-  canvas.style.cursor = isPencilActive ? 'crosshair' : 'default';
-}
+  // Reset cursor based on active tool
+  if (isPencilActive) {
+    canvas.style.cursor = 'crosshair';
+  } else if (isEraserActive) {
+    canvas.style.cursor = 'not-allowed'; // Eraser cursor
+  } else {
+    canvas.style.cursor = 'default';
+  }
+});
 
-// Attach event listeners to the document
-document.addEventListener("mousedown", handleMouseDown);
-document.addEventListener("mousemove", handleMouseMove);
-document.addEventListener("mouseup", handleMouseUp);
+canvas.addEventListener("mouseout", () => {
+  isDrawing = false;
+  // Reset cursor based on active tool
+  if (isPencilActive) {
+    canvas.style.cursor = 'crosshair';
+  } else if (isEraserActive) {
+    canvas.style.cursor = 'not-allowed'; // Eraser cursor
+  } else {
+    canvas.style.cursor = 'default';
+  }
+});
 
 // Draw function
 function draw() {
@@ -169,60 +188,118 @@ function draw() {
 
     gl.uniform4f(colorLocation, ...color); // Set the color for the stroke
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
-
-    if (points.length === 2) {
-      // Draw a point if the stroke has only one point
-      gl.drawArrays(gl.POINTS, 0, 1);
-    } else {
-      // Draw a line strip if the stroke has multiple points
-      gl.drawArrays(gl.LINE_STRIP, 0, points.length / 2);
-    }
+    gl.drawArrays(gl.LINE_STRIP, 0, points.length / 2);
   });
 }
 
-// Clear the canvas
-function clearCanvas() {
-  // Set the clear color to off-white
-  gl.clearColor(245 / 255, 245 / 255, 245 / 255, 1); // Off-white background
-  gl.clear(gl.COLOR_BUFFER_BIT); // Clear the Buffer
-  strokes.length = 0; // Clear all stored strokes
+// Erase function
+function eraseStroke(x, y) {
+  for (let i = 0; i < strokes.length; i++) {
+    const stroke = strokes[i];
+    for (let j = 0; j < stroke.points.length; j++) {
+      const [px, py] = stroke.points[j];
+      const dx = x - px;
+      const dy = y - py;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < ERASER_RADIUS) {
+        strokes.splice(i, 1); // Remove the stroke
+        return;
+      }
+    }
+  }
 }
 
-clearCanvas();
 
-// Prevent context menu on right-click
-canvas.addEventListener("contextmenu", (e) => e.preventDefault());
-
-// Helper function to convert hex color to RGB
+// Utility function to convert hex color to RGB
 function hexToRgb(hex) {
-  let r = 0, g = 0, b = 0;
-  // 3 digits
-  if (hex.length === 4) {
-    r = parseInt(hex[1] + hex[1], 16);
-    g = parseInt(hex[2] + hex[2], 16);
-    b = parseInt(hex[3] + hex[3], 16);
-  }
-  // 6 digits
-  else if (hex.length === 7) {
-    r = parseInt(hex[1] + hex[2], 16);
-    g = parseInt(hex[3] + hex[4], 16);
-    b = parseInt(hex[5] + hex[6], 16);
-  }
+  const bigint = parseInt(hex.slice(1), 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
   return [r, g, b];
 }
 
-// Pencil tool click event handler
-document.getElementById("pencilTool").addEventListener("click", () => {
-  // Toggle pencil tool state
-  isPencilActive = !isPencilActive;
+// Initial draw
+gl.clearColor(1, 1, 1, 1);
+gl.clear(gl.COLOR_BUFFER_BIT);
 
-  // Update pencil tool icon state
-  const pencilToolIcon = document.getElementById("pencilTool");
+function clearCanvas() {
+  strokes.length = 0; // Clear all stored strokes
+  gl.clear(gl.COLOR_BUFFER_BIT); // Clear the WebGL canvas
+}
+
+// const customCursor = document.createElement("img");
+// customCursor.src = "eraser.png"; // Path to your custom cursor image
+
+// Tool selectors
+const pencilTool = document.getElementById("pencilTool");
+const eraserTool = document.getElementById("eraserTool");
+const brushColorPicker = document.getElementById("brushColor");
+const clearTool = document.getElementById("clearTool"); 
+
+function updateToolIconBackground(toolElement, color) {
+  toolElement.style.backgroundColor = color;
+}
+
+pencilTool.addEventListener("click", () => {
   if (isPencilActive) {
-    pencilToolIcon.classList.add("active");
-    canvas.style.cursor = 'crosshair'; // Set cursor to crosshair when tool is active
+    isPencilActive = false;
+    pencilTool.classList.remove("active");
+    pencilTool.style.backgroundColor = ""; // Reset background color
+    canvas.style.cursor = "default";
   } else {
-    pencilToolIcon.classList.remove("active");
-    canvas.style.cursor = 'default'; // Set cursor to default when tool is not active
+    isPencilActive = true;
+    isEraserActive = false;
+    pencilTool.classList.add("active");
+    eraserTool.classList.remove("active");
+    updateToolIconBackground(pencilTool, brushColorPicker.value); // Set active color
+    eraserTool.style.backgroundColor = ""; // Reset eraser background color
+    canvas.style.cursor = "crosshair";
   }
 });
+
+eraserTool.addEventListener("click", () => {
+  if (isEraserActive) {
+    isEraserActive = false;
+    eraserTool.classList.remove("active");
+    eraserTool.style.backgroundColor = ""; // Reset background color
+    canvas.style.cursor = "default";
+  } else {
+    isEraserActive = true;
+    isPencilActive = false;
+    eraserTool.classList.add("active");
+    pencilTool.classList.remove("active");
+    pencilTool.style.backgroundColor = ""; // Reset pencil background color
+    canvas.style.cursor = "not-allowed";
+    
+  }
+});
+
+// Listen to color picker changes to update the pencil tool background color
+brushColorPicker.addEventListener("input", () => {
+  if (isPencilActive) {
+    updateToolIconBackground(pencilTool, brushColorPicker.value); // Update pencil icon color
+  }
+});
+
+// Add event listener for the "All Clear" image to clear the canvas
+clearTool.addEventListener("mousedown", () => {
+  // Add 'active' class to simulate a button press
+  clearTool.classList.add("active");
+  
+  // Clear the canvas
+  clearCanvas();
+});
+
+clearTool.addEventListener("mouseup", () => {
+  // Remove 'active' class when mouse button is released
+  clearTool.classList.remove("active");
+});
+
+// Optional: Also handle mouseleave to ensure the button is deactivated
+// if the user releases the mouse button outside of the image
+clearTool.addEventListener("mouseleave", () => {
+  clearTool.classList.remove("active");
+});
+
