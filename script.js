@@ -205,6 +205,7 @@ function draw_neon() {
     const color = stroke.color;
 
     gl.uniform4f(colorLocation, ...color);
+
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
     gl.drawArrays(gl.LINE_STRIP, 0, points.length / 2);
   });
@@ -221,7 +222,9 @@ function draw_neon() {
     const fadedColor = [...baseColor.slice(0, 3), alpha];
 
     gl.uniform4f(colorLocation, ...fadedColor);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
+
+    
+     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
     gl.drawArrays(gl.LINE_STRIP, 0, points.length / 2);
 
     return alpha > 0;
@@ -229,6 +232,7 @@ function draw_neon() {
 
   requestAnimationFrame(draw_neon);
 }
+
 
 // Clear the canvas
 let animationFrameId = null;

@@ -6,6 +6,7 @@ html {
   overflow: hidden; /* Prevent scrollbars */
   
 }
+
 #Topbar {
   position: fixed; 
   top: 0;
@@ -24,6 +25,29 @@ html {
   /* padding-top: 20px;  */
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); 
 }
+
+#brushColor{
+  
+  border-radius: 50%;
+ background: #c2c2c2;
+ border: none;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+  width: 30px;
+
+}
+
+#brushColor::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+  /* width: 38px; */
+  
+}
+#brushColor::-moz-color-swatch {
+  display: none;
+}
+
 .tool-icon-clear{
   width: 40px; /* Icon size */
   height: 40px;
@@ -87,6 +111,12 @@ canvas {
 }
 
 #eraserTool {
+  width: 30px;
+  height: 30px;
+  padding: 8%;
+}
+
+#neonPenTool{
   width: 30px;
   height: 30px;
   padding: 8%;
