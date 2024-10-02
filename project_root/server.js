@@ -14,21 +14,25 @@ app.get('/', (req, res) => {
 });
 
 wss.on('connection', (ws) => {
-  console.log('Client connected');
+  const userId = generateUniqueId(); // Generate a unique ID for each connection
+  console.log(`Client connected with ID: ${userId}`);
 
   ws.on('message', (message) => {
     console.log('Received message:', message.toString());
+    const data = JSON.parse(message);
+    data.userId = userId; // Add the userId to the message data
+
     // Broadcast to all clients
     wss.clients.forEach((client) => {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
         console.log('Broadcasting message to a client');
-        client.send(message.toString());
+        client.send(JSON.stringify(data));
       }
     });
   });
 
   ws.on('close', () => {
-    console.log('Client disconnected');
+    console.log(`Client disconnected: ${userId}`);
   });
 });
 

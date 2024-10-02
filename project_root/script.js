@@ -10,6 +10,9 @@ socket.onmessage = function (event) {
     handleRemoteDrawing(data);
 };
 
+// Initialize an object to store current remote strokes for each user
+const currentRemoteStrokes = {};
+
 socket.onerror = function (error) {
     console.error(`WebSocket Error: ${error}`);
 };
@@ -139,8 +142,9 @@ function generateUniqueId() {
 }
 
 class Stroke {
-    constructor() {
+    constructor(userId) {
         this.id = generateUniqueId();
+        this.userId = userId;
         this.points = [];
         this.color = [0, 0, 0, 1];
         this.scale = 1;
@@ -574,6 +578,7 @@ function draw_neon() {
 // Function to handle remote selection updates
 function handleRemoteSelection(data) {
     console.log('Handling remote selection:', data);
+    const { type, userId } = data;
     if (data.type === 'selection') {
         const { x, y, selectedStrokeIndex } = data;
         if (selectedStrokeIndex >= 0 && selectedStrokeIndex < strokes.length) {
@@ -592,28 +597,27 @@ let currentRemoteStroke = null;
 let isNewStroke = true;
 
 function handleRemoteDrawing(data) {
-    const { type } = data;
+    const { type, userId } = data;
     
     switch (type) {
         case 'draw':
             const { x, y, color, strokeId } = data;
             
             // Check if we need to start a new stroke
-            if (isNewStroke || !currentRemoteStroke || !colorMatch(currentRemoteStroke.color, color) || currentRemoteStroke.id !== strokeId) {
-                currentRemoteStroke = new Stroke();
-                currentRemoteStroke.id = strokeId;
-                currentRemoteStroke.setColor(color[0], color[1], color[2], color[3]);
-                strokes.push(currentRemoteStroke);
-                isNewStroke = false;
+            if (!currentRemoteStrokes[userId] || currentRemoteStrokes[userId].id !== strokeId) {
+                currentRemoteStrokes[userId] = new Stroke(userId);
+                currentRemoteStrokes[userId].id = strokeId;
+                currentRemoteStrokes[userId].setColor(color[0], color[1], color[2], color[3]);
+                strokes.push(currentRemoteStrokes[userId]);
             }
             
-            currentRemoteStroke.addPoint(x, y);
+            currentRemoteStrokes[userId].addPoint(x, y);
             draw();  // Redraw the canvas to include the new point
             break;
+
         case 'drawEnd':
-            // Reset the current remote stroke and set isNewStroke to true
-            currentRemoteStroke = null;
-            isNewStroke = true;
+            // Reset the current remote stroke for this user
+            currentRemoteStrokes[userId] = null;
             break;
 
         case 'erase':
