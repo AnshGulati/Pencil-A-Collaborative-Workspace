@@ -4,25 +4,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WebGL Drawing Example</title>
+  <title>Pencil - Collaborative Whiteboard using WebGL</title>
   <link rel="stylesheet" href="style.css">
-</head>
 </head>
 
 <body>
   <div id="Topbar">
     <img src="Assets/All Clear.png" class="tool-icon-clear" id="clearTool" alt="Clear Tool" />
-
-
   </div>
 
   <div id="sidebar">
     <input type="color" id="brushColor" value="#000000" />
     <img src="Assets/pencil.png" class="tool-icon" id="pencilTool" alt="Pencil Tool" />
     <img src="Assets/eraser.png" class="tool-icon-2" id="eraserTool" alt="Eraser Tool" />
-    <img src="./Assets/laser.png" class="tool-icon" id="neonPenTool" alt="Neon Pen Tool" />
+    <img src="Assets/selectiontool.png" class="tool-icon-2" id="selectionTool" alt="Selection Tool" />
+    <img src="Assets/laser.png" class="tool-icon-2" id="neonPenTool" alt="Neon Pen Tool" />
+
   </div>
 
+  <div id="footer">
+    <p class="cen">Developed by Graphics & Gaming students 2024</p>
+  </div>
 
   <canvas id="webglCanvas"></canvas>
   <script src="script.js"></script>

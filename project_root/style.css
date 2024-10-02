@@ -1,18 +1,22 @@
+* {
+  box-sizing: border-box;
+}
 
 body,
 html {
   margin: 0;
   padding: 0;
   overflow: hidden; /* Prevent scrollbars */
-  
 }
 
 #Topbar {
-  position: fixed; 
+  position: fixed;
   top: 0;
   left: 0;
-  width: 800px; /* Sidebar width */
-  height: 6vh; /* Full viewport height */
+  width: 800px;
+  /* Sidebar width */
+  height: 6vh;
+  /* Full viewport height */
   background-color: #ccc;
   /* border: 1px solid #afafaf; */
   border-radius: 8px;
@@ -20,17 +24,43 @@ html {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-left: 33%;
+  margin-left: 27%;
   margin-top: 10px;
   /* padding-top: 20px;  */
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#footer {
+  position: fixed; 
+  top: 90;
+  left: 0;
+  width: 2150px; /* Sidebar width */
+  height: 6vh; /* Full viewport height */
+  background-color: #e0e0e0;
+  /* border: 1px solid #afafaf; */
+  border-radius: 8px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+/* margin-left: 33%; */
+  /* margin-bottom: 10px; */
+  /* padding-top: 20px;  */
+  margin-top: 920px;
+  
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); 
 }
 
-#brushColor{
-  
+#footer .cen{
+  margin-right: 400px;
+  margin-top: 20px;
+}
+
+#brushColor {
+
   border-radius: 50%;
- background: #c2c2c2;
- border: none;
+  background: #c2c2c2;
+  border: none;
   height: 32px;
   padding: 0;
   margin: 0;
@@ -42,14 +72,16 @@ html {
   border: none;
   border-radius: 50%;
   /* width: 38px; */
-  
+
 }
+
 #brushColor::-moz-color-swatch {
   display: none;
 }
 
-.tool-icon-clear{
-  width: 40px; /* Icon size */
+.tool-icon-clear {
+  width: 40px;
+  /* Icon size */
   height: 40px;
   padding: 2px;
   margin-top: 8px;
@@ -57,6 +89,7 @@ html {
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
 }
+
 .tool-icon-clear:hover {
   background-color: #ddd;
 }
@@ -66,14 +99,17 @@ html {
   background-color: #3195ff;
   transform: scale(1.1);
 }
+
 #sidebar {
   position: fixed;
   top: 0;
   left: 0;
-  width: 60px; /* Sidebar width */
-  height: 60vh; /* Full viewport height */
+  width: 60px;
+  /* Sidebar width */
+  height: 450px;
+  /* Sidebar height */
   background-color: #ccc;
-  
+  border: 1px solid #afafaf;
   border-radius: 8px;
   z-index: 1000;
   display: flex;
@@ -81,28 +117,35 @@ html {
   align-items: center;
   margin-left: 10px;
   margin-top: 80px;
-  padding-top: 20px; /* Space at the top for tools */
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Add drop shadow */
+  padding-top: 20px;
+  /* Space at the top for tools */
+
+  /* Add drop shadow */
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
 }
+
 canvas {
   display: block;
   width: 100vw;
   height: 100vh;
   cursor: default;
-  display: block;
 }
+
 .tool-icon,
 .tool-icon-2 {
-  width: 40px; /* Icon size */
+  width: 40px;
+  
   height: 40px;
-  margin-top: 25%;
+  margin-top: 20px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
 }
+
 .tool-icon:hover,
 .tool-icon-2:hover {
   background-color: #ddd;
 }
+
 .tool-icon.active,
 .tool-icon-2.active {
   border-radius: 8px;
@@ -111,12 +154,24 @@ canvas {
 }
 
 #eraserTool {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   padding: 8%;
 }
 
 #neonPenTool{
+  width: 40px;
+  height: 40px;
+  padding: 8%;
+}
+
+#selectionTool {
+  width: 40px;
+  height: 40px;
+  padding: 8%;
+}
+
+#rectangleShapeTool {
   width: 30px;
   height: 30px;
   padding: 8%;
