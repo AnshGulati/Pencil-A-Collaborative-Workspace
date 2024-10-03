@@ -14,11 +14,12 @@
     "drawing",
     "collaborative"
   ],
-  "author": "Love Dewangan",
+  "author": "Prompt Engineers",
   "license": "MIT",
   "dependencies": {
     "ws": "^8.12.0",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "uuid": "^8.3.2"
   },
   "engines": {
     "node": ">=14.x"

@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const server = http.createServer(app);
@@ -14,15 +15,26 @@ app.get('/', (req, res) => {
 });
 
 wss.on('connection', (ws) => {
-  const userId = generateUniqueId(); // Generate a unique ID for each connection
-  console.log(`Client connected with ID: ${userId}`);
+  const userId = uuidv4(); // Generate a unique user ID
+  console.log('Client connected with ID:', userId);
+
+  // Send the user ID to the client
+  ws.send(JSON.stringify({ type: 'userId', userId: userId }));
 
   ws.on('message', (message) => {
     console.log('Received message:', message.toString());
-    const data = JSON.parse(message);
-    data.userId = userId; // Add the userId to the message data
 
-    // Broadcast to all clients
+    // Parse the message
+    const data = JSON.parse(message);
+
+    if (!data.userId) {
+      data.userId = userId;
+    }
+
+    // If it's a draw event and doesn't have a strokeId, add one
+
+
+    // Broadcast to all clients except the sender
     wss.clients.forEach((client) => {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
         console.log('Broadcasting message to a client');
@@ -32,7 +44,7 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
-    console.log(`Client disconnected: ${userId}`);
+    console.log('Client disconnected:', userId);
   });
 });
 
