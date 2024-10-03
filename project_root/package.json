@@ -14,7 +14,7 @@
     "drawing",
     "collaborative"
   ],
-  "author": "Love Dewangan",
+  "author": "Prompt Engineers",
   "license": "MIT",
   "dependencies": {
     "ws": "^8.12.0",

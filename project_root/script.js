@@ -35,6 +35,18 @@ connectWebSocket();
 document.getElementById("clearTool").addEventListener("click", clearCanvas);
 
 
+//custom cursors
+const eraserCursor = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="34" viewBox="-11 6.5 34 24" transform="rotate(-30, 12, 12)"><rect x="2" y="4" width="15" height="18" rx="2" ry="2" fill="pink" stroke="black" stroke-width="2"/><rect x="2" y="12" width="15" height="15" rx="2" ry="4" fill="white" stroke="black" stroke-width="2"/></svg>`;
+
+//const pencilCursor = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" fill="black"/><path d="M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="black"/></svg>`;
+//const pencilCursor = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" fill="${brushColorPicker.value}"/><path d="M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="${brushColorPicker.value}'/></svg>`;
+
+
+const neonPenCursor = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" fill="none" stroke="red" stroke-width="2"/><path d="M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="red"/></svg>`;
+
+
+
+
 // Initialize WebGL context
 const canvas = document.getElementById("webglCanvas");
 const gl = canvas.getContext("webgl");
@@ -205,7 +217,7 @@ class Stroke {
         return false;
     }
 
-    
+
     distanceToLineSegment(x, y, x1, y1, x2, y2) {
         const A = x - x1;
         const B = y - y1;
@@ -283,6 +295,8 @@ let userStrokes = {};
 canvas.addEventListener("mousedown", (e) => {
     if (!isPencilActive && !isEraserActive && !isNeonPenActive && !isSelectionActive) return; // Do nothing if no tool is active
 
+
+
     const [x, y] = getMousePosition(canvas, e);
     lastX = x;
     lastY = y;
@@ -290,6 +304,7 @@ canvas.addEventListener("mousedown", (e) => {
     isDrawing = true;
 
     if (isEraserActive) {
+        canvas.style.cursor = `url('${eraserCursor}') 16 16, auto`;
         eraseStroke(x, y);
         const message = JSON.stringify({ type: 'erase', x, y });
         socket.send(message);
@@ -298,6 +313,7 @@ canvas.addEventListener("mousedown", (e) => {
     }
 
     if (isPencilActive) {
+        canvas.style.cursor = `url('${getPencilCursor(brushColorPicker.value)}') 0 24, auto`;
         isDrawing = true;
         const brushColor = document.getElementById("brushColor").value;
         const [r, g, b] = hexToRgb(brushColor);
@@ -332,7 +348,9 @@ canvas.addEventListener("mousedown", (e) => {
         };
         fadeStrokes.push(newNeonStroke);
 
-        canvas.style.cursor = 'crosshair';
+        //canvas.style.cursor = 'crosshair';
+        canvas.style.cursor = `url('${neonPenCursor}') 0 24, auto`;
+
         if (!animationFrameId) {
             animationFrameId = requestAnimationFrame(draw_neon);
         }
@@ -349,12 +367,15 @@ canvas.addEventListener("mousedown", (e) => {
         console.log('Sending neonDraw action:', message);
         socket.send(message);
 
+        canvas.style.cursor = `url('${neonPenCursor}') 0 24, auto`;
+        //canvas.style.cursor = 'crosshair';
+
         if (!animationFrameId) {
             animationFrameId = requestAnimationFrame(draw_neon);
         }
     }
 
-    
+
 
     if (isSelectionActive) {
         selectedStroke = detectLineClick(x, y);
@@ -366,8 +387,9 @@ canvas.addEventListener("mousedown", (e) => {
             else if (e.ctrlKey) {
                 isRotating = true;
             }
+
             canvas.style.cursor = 'move';
-    
+
             // Send the selection action to the server
             const message = JSON.stringify({
                 type: 'selection',
@@ -389,9 +411,12 @@ canvas.addEventListener("mousemove", (e) => {
     const dx = x - lastX;
     const dy = y - lastY;
 
-    
+
 
     if (isPencilActive && currentStroke) {
+
+        //canvas.style.cursor = `url('${getPencilCursor(brushColorPicker.value)}') 0 24, auto`;
+
         currentStroke.addPoint(x, y);
         requestAnimationFrame(draw);
 
@@ -406,6 +431,9 @@ canvas.addEventListener("mousemove", (e) => {
     }
 
     else if (isNeonPenActive && isDrawing) {
+
+        //canvas.style.cursor = `url('${neonPenCursor}') 0 24, auto`;
+
         const currentTime = Date.now();
         const currentStroke = fadeStrokes[fadeStrokes.length - 1];
         currentStroke.points.push([x, y]);
@@ -440,7 +468,7 @@ canvas.addEventListener("mousemove", (e) => {
             selectedStroke.move(dx, dy);
             action = 'move';
         }
-    
+
         const message = JSON.stringify({
             type: 'selection',
             dx,
@@ -449,7 +477,7 @@ canvas.addEventListener("mousemove", (e) => {
             action
         });
         socket.send(message);
-    
+
         draw();
     }
 
@@ -458,9 +486,9 @@ canvas.addEventListener("mousemove", (e) => {
 });
 
 canvas.addEventListener("mouseup", () => {
-    
+
     if (isDrawing) {
-        const message = JSON.stringify({ 
+        const message = JSON.stringify({
             type: 'drawEnd',
             userId: userId,
             strokeId: currentStroke ? currentStroke.id : null
@@ -472,6 +500,9 @@ canvas.addEventListener("mouseup", () => {
 
 
     if (isNeonPenActive) {
+
+        canvas.style.cursor = `url('${neonPenCursor}') 0 24, auto`;
+
         const message = JSON.stringify({ type: 'neonDrawEnd' });
         socket.send(message);
         isDrawing = false;
@@ -488,21 +519,39 @@ canvas.addEventListener("mouseup", () => {
 
     // Reset cursor based on active tool
     if (isPencilActive) {
-        canvas.style.cursor = 'crosshair';
+        canvas.style.cursor = `url('${getPencilCursor(brushColorPicker.value)}') 0 24, auto`;
+        //canvas.style.cursor = 'crosshair';
     } else if (isEraserActive) {
-        canvas.style.cursor = 'not-allowed'; // Eraser cursor
-    } else {
-        canvas.style.cursor = 'default';
+        canvas.style.cursor = `url('${eraserCursor}') 16 16, auto`;
+        //canvas.style.cursor = 'not-allowed'; // Eraser cursor
+    } else if (isSelectionActive) {
+        canvas.style.cursor = 'move';
+        //canvas.style.cursor = 'not-allowed'; // Eraser cursor
+    }
+
+    else if (isNeonPenActive) {
+        canvas.style.cursor = `url('${neonPenCursor}') 0 24, auto`;
+    }
+    else {
+        canvas.style.cursor = cursor;
     }
 });
 
 canvas.addEventListener("mouseout", () => {
     isDrawing = false;
     if (isPencilActive) {
-        canvas.style.cursor = 'crosshair';
+        //canvas.style.cursor = 'crosshair';
+        canvas.style.cursor = `url('${getPencilCursor(brushColorPicker.value)}') 0 24, auto`;
     } else if (isEraserActive) {
-        canvas.style.cursor = 'not-allowed'; // Eraser cursor
-    } else {
+        canvas.style.cursor = `url('${eraserCursor}') 16 16, auto`;
+        //canvas.style.cursor = 'not-allowed'; // Eraser cursor
+    } else if (isNeonPenActive) {
+        canvas.style.cursor = `url('${neonPenCursor}') 0 24, auto`;
+    } else if (isSelectionActive) {
+        canvas.style.cursor = 'move';
+    }
+
+    else {
         canvas.style.cursor = 'default';
     }
 });
@@ -540,7 +589,7 @@ let currentTime = 0;
 function draw_neon() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    
+
 
     // Draw pencil strokes
     strokes.forEach((stroke) => {
@@ -552,7 +601,7 @@ function draw_neon() {
     let activeStrokes = 0;
 
     fadeStrokes = fadeStrokes.filter(stroke => {
-    
+
         // return alpha > 0;
         const timeSinceLastDraw = currentTime - stroke.lastDrawTime;
         //const timeSinceStart = currentTime - stroke.startTime;
@@ -571,7 +620,7 @@ function draw_neon() {
             stroke.alpha = 1;
         }
 
-        
+
 
         if (stroke.alpha > 0) {
             activeStrokes++;
@@ -619,7 +668,7 @@ let isNewStroke = true;
 
 function handleRemoteDrawing(data) {
     const { type, userId, strokeId } = data;
-    
+
     switch (type) {
         case 'drawStart':
             const { x, y, color } = data;
@@ -652,7 +701,7 @@ function handleRemoteDrawing(data) {
         case 'neonDraw':
             const { x: neonX, y: neonY, color: neonColor, startTime, lastDrawTime } = data;
             let currentNeonStroke = fadeStrokes.find(stroke => stroke.startTime === startTime && stroke.userId === userId);
-            
+
             if (!currentNeonStroke) {
                 currentNeonStroke = {
                     points: [],
@@ -788,6 +837,9 @@ function updateToolIconBackground(toolElement, color) {
     toolElement.style.backgroundColor = color;
 }
 
+function getPencilCursor(color) {
+    return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" fill="${encodeURIComponent(color)}"/><path d="M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="${encodeURIComponent(color)}"/></svg>`;
+}
 
 
 pencilTool.addEventListener("click", () => {
@@ -809,7 +861,9 @@ pencilTool.addEventListener("click", () => {
         eraserTool.style.backgroundColor = ""; // Reset eraser background color
         neonPenTool.style.backgroundColor = ""; // Reset neon-pen background color
         selectionTool.style.backgroundColor = ""; // Reset select tool background color
-        canvas.style.cursor = "crosshair";
+        //canvas.style.cursor = "crosshair";
+        canvas.style.cursor = `url('${getPencilCursor(brushColorPicker.value)}') 0 24, auto`;
+
     }
 });
 
@@ -833,7 +887,8 @@ eraserTool.addEventListener("click", () => {
         pencilTool.style.backgroundColor = ""; // Reset pencil background color
         neonPenTool.style.backgroundColor = ""; // Reset neon-pen background color
         selectionTool.style.backgroundColor = ""; // Reset pencil background color
-        canvas.style.cursor = "not-allowed";
+        // canvas.style.cursor = "not-allowed";
+        canvas.style.cursor = `url('${eraserCursor}') 16 16, auto`;
 
     }
 });
@@ -860,7 +915,8 @@ neonPenTool.addEventListener("click", () => {
         eraserTool.style.backgroundColor = ""; // Reset eraser background color
         selectionTool.style.backgroundColor = ""; // Reset selection-tool background color
 
-        canvas.style.cursor = "crosshair";
+        //canvas.style.cursor = "crosshair";
+        canvas.style.cursor = `url('${neonPenCursor}') 0 24, auto`;
 
     }
 });
@@ -884,7 +940,8 @@ selectionTool.addEventListener("click", () => {
         eraserTool.style.backgroundColor = ""; // Reset eraser background color
         neonPenTool.style.backgroundColor = ""; // Reset neon-pen background color
         pencilTool.style.backgroundColor = ""; // Reset pencil background color
-        canvas.style.cursor = "cursor";
+        //canvas.style.cursor = "cursor";
+        canvas.style.cursor = 'move';
     }
 });
 
@@ -892,6 +949,8 @@ selectionTool.addEventListener("click", () => {
 brushColorPicker.addEventListener("input", () => {
     if (isPencilActive) {
         updateToolIconBackground(pencilTool, brushColorPicker.value); // Update pencil icon color
+        canvas.style.cursor = `url('${getPencilCursor(brushColorPicker.value)}') 0 24, auto`;
+
     }
 });
 
