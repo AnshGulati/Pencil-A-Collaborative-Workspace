@@ -23,7 +23,18 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (message) => {
     console.log('Received message:', message.toString());
-    // Broadcast to all clients
+
+    // Parse the message
+    const data = JSON.parse(message);
+
+    if (!data.userId) {
+      data.userId = userId;
+    }
+
+    // If it's a draw event and doesn't have a strokeId, add one
+
+
+    // Broadcast to all clients except the sender
     wss.clients.forEach((client) => {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
         console.log('Broadcasting message to a client');
