@@ -1,26 +1,37 @@
-const socket = new WebSocket('wss://pencil-with-dsa-implementation.onrender.com');
-// const socket = new WebSocket('http://localhost:8080/')
-socket.onopen = function (event) {
-    console.log('Connected to the WebSocket server');
-};
 
-socket.onmessage = function (event) {
-    console.log('Received message from server:', event.data);
-    const data = JSON.parse(event.data);
-    handleRemoteDrawing(data);
-};
 
-socket.onerror = function (error) {
-    console.error(`WebSocket Error: ${error}`);
-};
+function connectWebSocket() {
+    socket = new WebSocket('wss://pencil-with-dsa-implementation.onrender.com');
+    socket.onopen = function (event) {
+        console.log('Connected to the WebSocket server');
+    };
 
-socket.onclose = function (event) {
-    console.log('WebSocket connection closed:', event);
-    if (event.code !== 1000) {
-        console.error('WebSocket closed unexpectedly. Code:', event.code, 'Reason:', event.reason);
-    }
-};
+    socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        if (data.type === 'userId') {
+            userId = data.userId;
+            console.log('Received user ID:', userId);
+        } else {
+            handleRemoteDrawing(data);
+        }
+    };
 
+    socket.onerror = function (error) {
+        console.error(`WebSocket Error: ${error}`);
+    };
+
+    socket.onclose = function (event) {
+        console.log('WebSocket connection closed:', event);
+        if (event.code !== 1000) {
+            console.error('WebSocket closed unexpectedly. Code:', event.code, 'Reason:', event.reason);
+            // Attempt to reconnect after a delay
+            setTimeout(connectWebSocket, 5000);
+        }
+    };
+}
+
+// Call this function when your application starts
+connectWebSocket();
 document.getElementById("clearTool").addEventListener("click", clearCanvas);
 
 
@@ -265,6 +276,9 @@ function detectLineClick(x, y) {
     return null;
 }
 
+let currentStroke = null;
+let userStrokes = {};
+
 // Mouse event handlers
 canvas.addEventListener("mousedown", (e) => {
     if (!isPencilActive && !isEraserActive && !isNeonPenActive && !isSelectionActive) return; // Do nothing if no tool is active
@@ -288,22 +302,20 @@ canvas.addEventListener("mousedown", (e) => {
         const brushColor = document.getElementById("brushColor").value;
         const [r, g, b] = hexToRgb(brushColor);
 
-        const newStroke = new Stroke();
-        newStroke.addPoint(x, y);
-        newStroke.setColor(r / 255, g / 255, b / 255, 1);
+        currentStroke = new Stroke();
+        currentStroke.addPoint(x, y);
+        currentStroke.setColor(r / 255, g / 255, b / 255, 1);
 
-        strokes.push(newStroke);
-
-        canvas.style.cursor = 'crosshair';
-        draw();
+        strokes.push(currentStroke);
 
         // Send the new stroke data to the server
         const message = JSON.stringify({
-            type: 'draw',
+            type: 'drawStart',
+            userId: userId,
+            strokeId: currentStroke.id,
             x,
             y,
-            color: newStroke.color,
-            strokeId: newStroke.id
+            color: currentStroke.color
         });
         socket.send(message);
     }
@@ -379,17 +391,16 @@ canvas.addEventListener("mousemove", (e) => {
 
     
 
-    if (isPencilActive && isDrawing) {
-        const currentStroke = strokes[strokes.length - 1];
+    if (isPencilActive && currentStroke) {
         currentStroke.addPoint(x, y);
-        draw();
+        requestAnimationFrame(draw);
 
         const message = JSON.stringify({
             type: 'draw',
+            userId: userId,
+            strokeId: currentStroke.id,
             x,
-            y,
-            color: currentStroke.color,
-            strokeId: currentStroke.id
+            y
         });
         socket.send(message);
     }
@@ -449,10 +460,15 @@ canvas.addEventListener("mousemove", (e) => {
 canvas.addEventListener("mouseup", () => {
     
     if (isDrawing) {
-        const message = JSON.stringify({ type: 'drawEnd' });
+        const message = JSON.stringify({ 
+            type: 'drawEnd',
+            userId: userId,
+            strokeId: currentStroke ? currentStroke.id : null
+        });
         socket.send(message);
     }
     isDrawing = false;
+    currentStroke = null;
 
 
     if (isNeonPenActive) {
@@ -491,6 +507,8 @@ canvas.addEventListener("mouseout", () => {
     }
 });
 
+
+let animationFrameId = null;
 // Draw function for normal strokes
 function draw() {
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -508,6 +526,13 @@ function draw() {
             stroke.draw(gl, colorLocation);
         }
     }
+
+    // // Request next frame only if there's ongoing drawing
+    // if (isDrawing || Object.keys(userStrokes).length > 0) {
+    //     animationFrameId = requestAnimationFrame(draw);
+    // } else {
+    //     animationFrameId = null;
+    // }
 }
 
 let currentTime = 0;
@@ -591,40 +616,42 @@ function handleRemoteSelection(data) {
 let currentRemoteStroke = null;
 let isNewStroke = true;
 
+
 function handleRemoteDrawing(data) {
-    const { type } = data;
+    const { type, userId, strokeId } = data;
     
     switch (type) {
-        case 'draw':
-            const { x, y, color, strokeId } = data;
-            
-            // Check if we need to start a new stroke
-            if (isNewStroke || !currentRemoteStroke || !colorMatch(currentRemoteStroke.color, color) || currentRemoteStroke.id !== strokeId) {
-                currentRemoteStroke = new Stroke();
-                currentRemoteStroke.id = strokeId;
-                currentRemoteStroke.setColor(color[0], color[1], color[2], color[3]);
-                strokes.push(currentRemoteStroke);
-                isNewStroke = false;
-            }
-            
-            currentRemoteStroke.addPoint(x, y);
-            draw();  // Redraw the canvas to include the new point
+        case 'drawStart':
+            const { x, y, color } = data;
+            userStrokes[strokeId] = new Stroke();
+            userStrokes[strokeId].id = strokeId;
+            userStrokes[strokeId].setColor(color[0], color[1], color[2], color[3]);
+            strokes.push(userStrokes[strokeId]);
+            userStrokes[strokeId].addPoint(x, y);
+            requestAnimationFrame(draw);
             break;
+
+        case 'draw':
+            const { x: drawX, y: drawY } = data;
+            if (userStrokes[strokeId]) {
+                userStrokes[strokeId].addPoint(drawX, drawY);
+                requestAnimationFrame(draw);
+            }
+            break;
+
         case 'drawEnd':
-            // Reset the current remote stroke and set isNewStroke to true
-            currentRemoteStroke = null;
-            isNewStroke = true;
+            delete userStrokes[strokeId];
             break;
 
         case 'erase':
             const { x: eraseX, y: eraseY } = data;
             eraseStroke(eraseX, eraseY);
-            draw();
+            requestAnimationFrame(draw);
             break;
 
         case 'neonDraw':
             const { x: neonX, y: neonY, color: neonColor, startTime, lastDrawTime } = data;
-            let currentNeonStroke = fadeStrokes.find(stroke => stroke.startTime === startTime);
+            let currentNeonStroke = fadeStrokes.find(stroke => stroke.startTime === startTime && stroke.userId === userId);
             
             if (!currentNeonStroke) {
                 currentNeonStroke = {
@@ -634,7 +661,8 @@ function handleRemoteDrawing(data) {
                     lastDrawTime: lastDrawTime,
                     isFading: false,
                     fadeStartTime: null,
-                    alpha: 1
+                    alpha: 1,
+                    userId: userId
                 };
                 fadeStrokes.push(currentNeonStroke);
             }
@@ -668,15 +696,14 @@ function handleRemoteDrawing(data) {
                         localStroke.rotateLine(rotationAngle);
                         break;
                 }
-                draw();
+                requestAnimationFrame(draw);
             }
             break;
-    
 
         case 'clear':
             strokes.length = 0;
             fadeStrokes.length = 0;
-            draw();
+            requestAnimationFrame(draw);
             break;
 
         default:
@@ -691,7 +718,7 @@ function colorMatch(color1, color2) {
 
 
 // Clear the canvas
-let animationFrameId = null;
+
 function clearCanvas() {
     gl.clearColor(245 / 255, 245 / 255, 245 / 255, 1); // Off-white background
     gl.clear(gl.COLOR_BUFFER_BIT);
