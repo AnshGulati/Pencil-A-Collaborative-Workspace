@@ -1,0 +1,833 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrollbars */
+}
+
+#welcomeScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeOut 0.5s ease 2.5s forwards;
+}
+
+#welcomeScreen h1 {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 900;
+  font-size: 8em;
+  color: #333;
+  margin-bottom: 15px;
+  animation: slideIn 0.8s ease;
+}
+
+#welcomeScreen p {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 400;
+  font-size: 1.2em;
+  color: #666;
+  animation: slideIn 0.8s ease 0.3s backwards;
+}
+
+#mainContent {
+  opacity: 0;
+  animation: fadeIn 0.5s ease 3s forwards;
+}
+
+#welcomeLogo {
+  animation: slideIn 0.8s ease 0.6s backwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { 
+      opacity: 0;
+      visibility: hidden;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+      transform: translateY(-100px);
+      opacity: 0;
+  }
+  to {
+      transform: translateY(0);
+      opacity: 1;
+  }
+}
+
+#Topbar {
+  position: fixed; 
+  top: 0;
+  left: 0;
+  width: 520px; /* Adjust as needed */
+  height: 6vh; /* Full viewport height */
+  background-color: #ccc;
+  border-radius: 8px;
+  z-index: 1000;
+  display: flex; /* Change from column to row */
+  align-items: center; /* Align items vertically */
+  margin-left: 40%;
+  margin-top: 10px;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); 
+}
+
+#footer {
+  position: fixed; 
+  bottom: 0;
+  left: 0;
+  width: 100%; /* Full width */
+  height: 6vh; /* Footer height */
+  background-color: #e0e0e0;
+  border-radius: 8px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: row; /* Align content in a row */
+  align-items: center;
+  justify-content: center; /* Center content */
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); 
+}
+
+#footer img {
+  width: 80px;
+  margin-right: 10px; /* Add space between image and text */
+}
+
+
+
+#footer .cen{
+  
+  margin-top: 20px;
+}
+
+.color-picker-container {
+  position: relative;
+  display: inline-block;
+}
+
+.color-picker-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #000000;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.color-picker-circle:hover {
+  transform: scale(1.1);
+}
+
+.hidden-color-picker {
+  position: absolute;
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}
+
+.color-palette {
+  position: absolute;
+  left: 50px;
+  top: 0;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  display: none;
+  width: 120px;
+  flex-wrap: wrap;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.color-palette.show {
+  display: flex;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.2s;
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+}
+
+.color-swatch.selected {
+  border-color: #000;
+}
+
+.custom-picker {
+  background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff) !important;
+  border: 2px solid #ffffff !important;
+}
+
+.tool-icon-topbar {
+  width: 40px; /* Icon size */
+  height: 40px;
+  padding: 5px;
+  margin: 0 10px; /* Add horizontal margin */
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+.tool-icon-topbar:hover {
+  background-color: #ddd;
+}
+
+.tool-icon-topbar.active {
+  border-radius: 8px;
+  background-color: #3195ff;
+  transform: scale(1.1);
+}
+
+#setBackgroundTool{
+  width: 40px;
+  height: 40px;
+  padding: 4px;
+}
+
+.background-dropdown {
+  display: none; /* Hidden by default */
+  position: absolute;
+  top: 101%;
+  left: 8%;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  width: 340px;
+  z-index: 1001;
+
+  flex-wrap: wrap; /* Allow items to wrap to the next row */
+  justify-content: space-between; /* Add spacing between the items */
+}
+
+.background-option {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 48%; /* Adjust width to fit two items per row */
+  box-sizing: border-box; /* Ensure padding is included within the width */
+}
+.background-option:hover {
+  background-color: #f0f0f0;
+}
+
+.background-option img {
+  width: 130px;
+  height: 75px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* .background-option span {
+  font-size: 14px;
+  color: #333;
+} */
+
+.background-dropdown.show {
+  display: block;
+}
+
+
+
+
+
+
+
+/* Dark mode styles */
+body.dark-mode {
+  color: #fff;
+  background-color: #222; /* Dark background for the body */
+}
+
+
+
+body.dark-mode #footer {
+  
+  color: #000000; /* Light text for footer in dark mode */
+}
+
+body.dark-mode #footer .cen {
+  color: #000000; /* Ensure the text color is always white in dark mode */
+}
+
+
+
+body.dark-mode .tool-icon-topbar:hover,
+body.dark-mode .tool-icon:hover,
+body.dark-mode .tool-icon-2:hover {
+  background-color: #555;
+}
+
+body.dark-mode .tool-icon-topbar.active,
+body.dark-mode .tool-icon.active,
+body.dark-mode .tool-icon-2.active {
+  background-color: #0077cc;
+}
+
+body.dark-mode canvas {
+  background-color: #222;
+}
+
+/* Hide/show mode toggle buttons */
+#lightModeTool {
+  display: none;
+}
+
+body.dark-mode #lightModeTool {
+  display: inline-block;
+}
+
+body.dark-mode #darkModeTool {
+  display: none;
+}
+
+/* You may want to adjust text color for better visibility in dark mode */
+body.dark-mode #Topbar,
+body.dark-mode #sidebar,
+body.dark-mode #footer {
+  color: #fff;
+}
+
+
+
+
+
+
+
+
+
+.tool-icon-clear{
+  width: 40px; /* Icon size */
+  height: 40px;
+  padding: 2px;
+  /* margin-top: 4px; */
+  margin-right: 7px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+.tool-icon-clear:hover {
+  background-color: #ddd;
+}
+
+.tool-icon-clear.active {
+  border-radius: 8px;
+  background-color: #3195ff;
+  transform: scale(1.1);
+}
+
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 60px;
+  /* Sidebar width */
+  height: 520px;
+  /* Sidebar height */
+  background-color: #ccc;
+  border: 1px solid #afafaf;
+  border-radius: 8px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 10px;
+  margin-top: 80px;
+  padding-top: 20px;
+  /* Space at the top for tools */
+
+  /* Add drop shadow */
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  cursor: default;
+}
+
+.tool-icon,
+.tool-icon-2 {
+  width: 40px;
+  
+  height: 40px;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.tool-icon:hover,
+.tool-icon-2:hover {
+  background-color: #ddd;
+}
+
+.tool-icon.active,
+.tool-icon-2.active {
+  border-radius: 8px;
+  background-color: #3195ff;
+  transform: scale(1.1);
+}
+
+
+#eraserTool {
+  width: 40px;
+  height: 40px;
+  padding: 8%;
+}
+
+#neonPenTool{
+  width: 40px;
+  height: 40px;
+  padding: 8%;
+}
+
+#selectionTool {
+  width: 40px;
+  height: 40px;
+  padding: 8%;
+}
+
+
+#rectangleShapeTool {
+  width: 30px;
+  height: 30px;
+  padding: 8%;
+}
+
+#textTool{
+  width: 40px;
+  height: 40px;
+  padding: 6%;
+  margin-top: 40px;
+}
+
+.export-button-container {
+  position: relative;
+  margin-left: auto; /* Align the container to the right */
+}
+
+.export-button {
+  background-color: #000000;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.export-button:hover {
+  background-color: #3195ff;
+}
+
+.export-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.export-dropdown.show {
+  display: block;
+}
+
+.export-option {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.export-option:hover {
+  background-color: #f0f0f0;
+}
+
+
+.shapes-container {
+  position: relative;
+  
+  width: 40px;
+  height: 40px;
+}
+
+/* Main shapes button */
+#shapesTool {
+  width: 40px;
+  height: 40px;
+  padding: 8%;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+#shapesTool:hover {
+  background-color: #ddd;
+}
+
+#shapesTool.active {
+  border-radius: 8px;
+  background-color: #3195ff;
+  transform: scale(1.1);
+}
+
+/* Shapes dropdown menu */
+.shapes-dropdown {
+  display: none;
+  position: absolute;
+  left: 100%; /* Position to the right of the shapes button */
+  top: 0;
+  background-color: #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+  width: max-content;
+}
+
+.shapes-dropdown.show {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+/* Individual shape buttons in dropdown */
+.shape-option {
+  width: 40px;
+  height: 40px;
+  padding: 8%;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  background-color: #fff;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shape-option:hover {
+  background-color: #ddd;
+}
+
+.shape-option.active {
+  background-color: #3195ff;
+  transform: scale(1.1);
+}
+
+/* Dark mode support */
+body.dark-mode .shapes-dropdown {
+  background-color: #333;
+}
+
+body.dark-mode .shape-option {
+  background-color: #444;
+}
+
+body.dark-mode .shape-option:hover {
+  background-color: #555;
+}
+
+.export-button-container {
+  position: relative;
+}
+
+.export-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
+
+.export-dropdown.show {
+  display: block;
+}
+
+.export-option {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.export-option:hover {
+  background-color: #f5f5f5;
+}
+
+/* Custom tooltip container */
+/* Custom tooltip container */
+/* Custom tooltip container */
+.tool-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Base tooltip styles */
+.tooltip {
+  visibility: hidden;
+  background-color: rgba(0, 0, 0, 0.518);
+  color: white;
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+  width: max-content;
+  max-width: 200px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+/* Specific positioning for top toolbar tooltips */
+#Topbar .tooltip {
+  left: 50%;
+  top: 120%;
+  transform: translateX(-50%);
+}
+
+/* Arrow for top toolbar tooltips */
+#Topbar .tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent rgba(0, 0, 0, 0.8) transparent;
+}
+
+/* Specific positioning for sidebar tooltips */
+#sidebar .tooltip {
+  left: 120%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Arrow for sidebar tooltips */
+#sidebar .tooltip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent rgba(0, 0, 0, 0.8) transparent transparent;
+}
+
+/* Show tooltip on hover */
+.tool-container:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+  animation: showHideTooltip 1s ease-in-out forwards;
+}
+
+@keyframes showHideTooltip {
+  0% {
+    opacity: 0;
+    visibility: visible;
+  }
+  15% {
+    opacity: 1;
+    visibility: visible;
+  }
+  85% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Adjust existing tool icon classes to work with tooltips */
+.tool-icon, .tool-icon-2, .tool-icon-clear, .tool-icon- {
+  position: relative;
+}
+
+.connection-status {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.connection-status.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.connection-status.offline {
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+}
+
+.connection-status.online {
+  background-color: #dcfce7;
+  border: 1px solid #22c55e;
+}
+
+.status-icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.offline .status-icon {
+  background-color: #ef4444;
+}
+
+.online .status-icon {
+  background-color: #22c55e;
+}
+
+.status-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.offline .status-text {
+  color: #b91c1c;
+}
+
+.online .status-text {
+  color: #15803d;
+}
+
+.stroke-size-container {
+  display: none; /* Hidden by default */
+  align-items: center;
+  background: #ffffff98;
+  padding: 10px 20px;
+  margin-left: -30px;
+  margin-top: 25px;
+  border-radius: 8px;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  /* min-width: 200px; */
+}
+
+/* Dark mode support for stroke size container */
+body.dark-mode .stroke-size-container {
+  background: #444;
+  color: #fff;
+}
+
+.stroke-size-container label {
+  margin-right: 30px;
+}
+
+.stroke-size-container input[type="range"] {
+  flex-grow: 1;
+  margin-right: -20px;
+  margin-bottom: -30px;
+}
+
+.stroke-size-container span {
+  width: 30px;
+}
+
+/* Share Button Styles */
+.share-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.share-button:hover {
+  background-color: #45a049;
+}
+
+.share-dropdown {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 120px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  border-radius: 4px;
+}
+
+.share-dropdown.show {
+  display: block;
+}
+
+.share-dropdown .share-option {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+.share-dropdown .share-option:hover {
+  background-color: #f1f1f1;
+}
+
+#shareRoomButton{
+  margin-left: 12px;
+  margin-right: 12px;
+}
