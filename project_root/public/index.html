@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pencil - Collaborative Whiteboard using WebGL</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <div id="welcomeScreen">
+    <h1>Pencil</h1>
+    <p>A Collaborative Whiteboard</p>
+    <img id="welcomeLogo" src="Assets/gglogo.jpg" alt="UPES Logo" width="100px">
+  </div>
+
+  <div id="Topbar">
+
+
+    <div class="tool-container">
+      <img src="Assets/All Clear.png" class="tool-icon-clear" id="clearTool" alt="Clear Tool" />
+      <span class="tooltip">Clear canvas</span>
+    </div>
+
+
+    <div class="tool-container">
+      <img src="Assets/background.png" class="tool-icon-topbar" id="setBackgroundTool" alt="Set Background Tool"
+        onclick="toggleBackgroundSelector()" />
+      <span class="tooltip">Background</span>
+    </div>
+
+    <div id="backgroundDropdown" class="background-dropdown">
+      <div class="background-option" onclick="changeBackground('BLANK')">
+        <img src="Assets/Background Images/Blank.png" alt="Blank" />
+
+      </div>
+      <div class="background-option" onclick="changeBackground('DOTS')">
+        <img src="Assets/Background Images/Dots.png" alt="Dots" />
+
+      </div>
+      <div class="background-option" onclick="changeBackground('GRAPH')">
+        <img src="Assets/Background Images/Graph.jpg" alt="Graph" />
+
+      </div>
+      <div class="background-option" onclick="changeBackground('LINES')">
+        <img src="Assets/Background Images/Lines.png" alt="Lines" />
+
+      </div>
+      <div class="background-option" onclick="changeBackground('HONEYCOMB')">
+        <img src="Assets/Background Images/Honeycomb.jpg" alt="Honeycomb" />
+
+      </div>
+    </div>
+
+    <div class="tool-container">
+      <img src="Assets/light-mode.png" class="tool-icon-topbar" id="lightModeTool" alt="Light Mode Tool" />
+      <span class="tooltip">Light Mode</span>
+    </div>
+
+    <div class="tool-container">
+      <img src="Assets/dark-mode.png" class="tool-icon-topbar" id="darkModeTool" alt="Dark Mode Tool" />
+      <span class="tooltip">Dark Mode</span>
+    </div>
+
+    <div class="tool-container">
+      <img src="Assets/undo.png" class="tool-icon-topbar" id="UndoTool" alt="Undo Tool">
+      <span class="tooltip">Undo</span>
+    </div>
+
+    <div class="tool-container">
+      <img src="Assets/redo.png" class="tool-icon-topbar" id="RedoTool" alt="Redo Tool">
+      <span class="tooltip">Redo</span>
+    </div>
+
+    <div class="tool-container"></div>
+    <div class="export-button-container">
+      <button id="exportButton" class="export-button">Export</button>
+      <div class="export-dropdown">
+        <div class="export-option" onclick="exportAsImage('png')">PNG</div>
+        <div class="export-option" onclick="exportAsImage('svg')">SVG</div>
+        <div class="export-option" onclick="exportAsImage('jpeg')">JPEG</div>
+        <div class="export-option" onclick="exportAsImage('pdf')">PDF</div>
+      </div>
+      <span class="tooltip">Export canvas</span>
+    </div>
+
+    <div class="tool-container">
+      <button id="shareRoomButton" class="share-button">Share Room</button>
+      <div id="shareOptionsDropdown" class="share-dropdown">
+        <div class="share-option" onclick="shareViaWhatsApp()">WhatsApp</div>
+        <div class="share-option" onclick="shareViaTelegram()">Telegram</div>
+        <div class="share-option" onclick="copyRoomDetails()">Copy Link</div>
+      </div>
+      <span class="tooltip">Share Room Details</span>
+    </div>
+  </div>
+  </div>
+
+  </div>
+
+  <div id="connectionStatus" class="connection-status">
+    <div class="status-icon"></div>
+    <span class="status-text">Offline</span>
+  </div>
+
+  <div id="sidebar">
+
+    <div class="tool-container">
+      <div class="color-picker-container">
+        <div id="colorPickerIcon" class="color-picker-circle"></div>
+        <div class="color-palette" id="colorPalette">
+          <!-- Default colors will be added here via JavaScript -->
+        </div>
+      </div>
+      <input type="color" id="brushColor" class="hidden-color-picker" value="#000000" />
+      <span class="tooltip">Color Picker</span>
+    </div>
+
+
+
+
+    <div class="tool-container">
+      <img src="Assets/pencil.png" class="tool-icon" id="pencilTool" alt="Pencil Tool" />
+      <span class="tooltip">Pencil</span>
+    </div>
+
+    <div class="tool-container">
+      <img src="Assets/eraser.png" class="tool-icon-2" id="eraserTool" alt="Eraser Tool" />
+      <span class="tooltip">Object Eraser</span>
+    </div>
+
+    <div class="tool-container">
+      <img src="Assets/PixelEraser.png" class="tool-icon-2" id="pixelEraserTool" alt="Pixel Eraser Tool" />
+      <span class="tooltip">Pixel Eraser</span>
+    </div>
+
+    <div class="tool-container">
+      <img src="Assets/selectiontool.png" class="tool-icon-2" id="selectionTool" alt="Selection Tool" />
+      <span class="tooltip">Selection</span>
+    </div>
+
+    <div class="tool-container">
+      <img src="Assets/laser.png" class="tool-icon-2" id="neonPenTool" alt="Neon Pen Tool" />
+      <span class="tooltip">Marker</span>
+    </div>
+
+    <div class="shapes-container">
+      <div class="tool-container">
+        <img src="Assets/shapes.png" class="tool-icon-2" id="shapesTool" alt="Shapes Tool"
+          onclick="toggleShapesDropdown()" />
+        <span class="tooltip">Shapes</span>
+      </div>
+      <div class="shapes-dropdown" id="shapesDropdown">
+        <div class="tool-container">
+          <img src="Assets/rectangle.png" class="shape-option" id="rectangleTool" alt="Rectangle Tool" />
+          <!-- <span class="tooltip">Draw rectangle</span> -->
+        </div>
+        <div class="tool-container">
+          <img src="Assets/circle.png" class="shape-option" id="circleTool" alt="Circle Tool" />
+          <!-- <span class="tooltip">Draw circle</span> -->
+        </div>
+        <div class="tool-container">
+          <img src="Assets/triangle.png" class="shape-option" id="triangleTool" alt="Triangle Tool" />
+          <!-- <span class="tooltip">Draw triangle</span> -->
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Add this to your sidebar div, next to other tool icons -->
+    <div class="tool-container">
+      <img src="Assets/text.png" class="tool-icon-2" id="textTool" alt="Text Tool" />
+      <span class="tooltip">Text</span>
+    </div>
+
+    <div class="stroke-size-container">
+      <label for="strokeSizeSlider">Stroke Size:</label>
+      <input type="range" id="strokeSizeSlider" min="1" max="10" value="0">
+      <span id="strokeSizeValue">1</span> <!-- Display current stroke size -->
+    </div>
+  </div>
+
+
+
+
+  <div id="footer">
+
+    <p class="cen">Developed by Graphics & Gaming students </p>
+    <img src="Assets/Logo/UPES.png" alt="">
+  </div>
+
+  <canvas id="webglCanvas"></canvas>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="js/script.js"></script>
+
+</body>
+
+</html>
