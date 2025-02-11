@@ -24,14 +24,14 @@ incorporating robust features for a more dynamic and versatile user experience.
 - **HTML5 and CSS3**: for User Interface
 - **Node.js and Express**: for Backend
 
-# Scope of the project
+## Scope of the project
 The scope of the project is to create a platform featuring freehand drawing, shape creation, and integrated voice
 communication, all rendered with high performance using WebGL. The platform will utilize a client-server architecture
 with WebSocket for real-time updates and synchronization, and WebRTC for voice chat. It will include secure user
 authentication and role-based access control. Further enhancements will also explore advanced collaboration tools and a
 sophisticated 3D model viewer with interactive functionalities in real-time rendering.
 
-# Future Work
+## Future Work
 - Advanced Drawing Tools: Introduction of more sophisticated tools such as layers, vector graphics, and shape 
 recognition to enhance the drawing experience.
 - Dedicated Diagram Tools: Tools for creating flowcharts, mind maps, and organizational charts using customizable 
