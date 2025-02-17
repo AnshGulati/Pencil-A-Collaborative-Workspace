@@ -31,6 +31,9 @@ with WebSocket for real-time updates and synchronization, and WebRTC for voice c
 authentication and role-based access control. Further enhancements will also explore advanced collaboration tools and a
 sophisticated 3D model viewer with interactive functionalities in real-time rendering.
 
+## Video Demonstration
+https://github.com/user-attachments/assets/de3df1d9-6f2d-44d9-8b95-5eeec2ca407e
+
 ## Future Work
 - Advanced Drawing Tools: Introduction of more sophisticated tools such as layers, vector graphics, and shape 
 recognition to enhance the drawing experience.
