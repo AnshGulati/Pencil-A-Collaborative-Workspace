@@ -1,5 +1,8 @@
 # Pencil A Collaborative Workspace
 
+## Video Demonstration
+https://github.com/user-attachments/assets/de3df1d9-6f2d-44d9-8b95-5eeec2ca407e
+
 ## Overview
 The Collaborative Whiteboard Application is a real-time, web-based platform that allows multiple users to draw, interact, and collaborate on a shared canvas. It features essential drawing tools, session management, and real-time updates, making it ideal for group brainstorming and creative collaboration. The application provides a seamless experience for users to work together, regardless of location.
 
@@ -30,9 +33,6 @@ communication, all rendered with high performance using WebGL. The platform will
 with WebSocket for real-time updates and synchronization, and WebRTC for voice chat. It will include secure user
 authentication and role-based access control. Further enhancements will also explore advanced collaboration tools and a
 sophisticated 3D model viewer with interactive functionalities in real-time rendering.
-
-## Video Demonstration
-https://github.com/user-attachments/assets/de3df1d9-6f2d-44d9-8b95-5eeec2ca407e
 
 ## Future Work
 - Advanced Drawing Tools: Introduction of more sophisticated tools such as layers, vector graphics, and shape 
